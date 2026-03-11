@@ -35,8 +35,10 @@ class OrderMonitorController extends Controller
             'completed' => Order::where('status', 'completed')->when($date, fn($q) => $q->whereDate('created_at', $date))->count(),
         ];
 
+        $currentStatus = $status;
+
         return view('superadmin.orders.index', compact(
-            'orders', 'kantins', 'counts', 'status', 'kantinId', 'date', 'search'
+            'orders', 'kantins', 'counts', 'currentStatus', 'kantinId', 'date', 'search'
         ));
     }
 }

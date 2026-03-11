@@ -217,15 +217,13 @@
                             Kategori Menu <span class="badge-req">Wajib</span>
                         </label>
                         <input type="hidden" name="category" id="category_hidden" value="{{ old('category', $menu->category) }}" required>
-                        <div style="display:flex; gap:12px;">
-                            <div class="cat-card {{ old('category', $menu->category) === 'makanan' ? 'selected' : '' }}" onclick="selectCategory('makanan', this)">
-                                <iconify-icon icon="solar:bowl-spoon-bold" style="color:{{ old('category', $menu->category) === 'makanan' ? 'var(--primary)' : 'var(--secondary)' }};"></iconify-icon>
-                                <span>Makanan</span>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                            @foreach($categories as $cat)
+                            <div class="cat-card {{ old('category', $menu->category) === $cat->name ? 'selected' : '' }}" onclick="selectCategory('{{ $cat->name }}', this)">
+                                <iconify-icon icon="{{ $cat->icon }}" style="color:{{ old('category', $menu->category) === $cat->name ? 'var(--primary)' : 'var(--secondary)' }};"></iconify-icon>
+                                <span>{{ ucfirst($cat->name) }}</span>
                             </div>
-                            <div class="cat-card {{ old('category', $menu->category) === 'minuman' ? 'selected' : '' }}" onclick="selectCategory('minuman', this)">
-                                <iconify-icon icon="solar:cup-hot-bold" style="color:{{ old('category', $menu->category) === 'minuman' ? 'var(--primary)' : 'var(--secondary)' }};"></iconify-icon>
-                                <span>Minuman</span>
-                            </div>
+                            @endforeach
                         </div>
                         @error('category')
                             <p class="error-msg"><iconify-icon icon="solar:danger-circle-bold"></iconify-icon>{{ $message }}</p>

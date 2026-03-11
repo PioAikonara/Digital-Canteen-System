@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SaDashboard;
 use App\Http\Controllers\SuperAdmin\UserController as SaUserController;
@@ -87,6 +88,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/orders/{order}/update-status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::get('/orders/history', [OrderController::class, 'history'])->name('orders.history');
     Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+
+    // User/Customer Management (by admin)
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
+    Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+    Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
 });
 
 // Customer Routes

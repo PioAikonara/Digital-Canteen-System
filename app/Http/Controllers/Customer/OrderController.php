@@ -56,6 +56,15 @@ class OrderController extends Controller
             // Calculate total price
             $totalPrice = $menu->price * $validated['quantity'];
 
+            // Check balance
+            $user = auth()->user();
+            if ($user->balance < $totalPrice) {
+                return back()->with('error', 'Saldo tidak mencukupi! Saldo kamu: Rp ' . number_format($user->balance, 0, ',', '.') . ', dibutuhkan: Rp ' . number_format($totalPrice, 0, ',', '.'));
+            }
+
+            // Deduct balance
+            $user->decrement('balance', $totalPrice);
+
             // Create order
             $order = Order::create([
                 'user_id' => auth()->id(),
@@ -78,7 +87,7 @@ class OrderController extends Controller
             DB::commit();
 
             return redirect()->route('customer.orders.index')
-                ->with('success', 'Pesanan berhasil dibuat! Silakan ambil pesanan pada ' . ($validated['pickup_time'] == 'istirahat_1' ? 'Istirahat 1' : 'Istirahat 2'));
+                ->with('success', 'Pesanan berhasil dibuat! Saldo berkurang Rp ' . number_format($totalPrice, 0, ',', '.'));
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -99,13 +108,30 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
+            $user = User::lockForUpdate()->find(auth()->id());
+            $totalBatch = 0;
+
+            // Pre-check all stocks and calculate total
             foreach ($validated['items'] as $item) {
                 $menu = Menu::where('id', $item['menu_id'])->lockForUpdate()->firstOrFail();
-
                 if ($menu->stock < $item['quantity']) {
                     DB::rollBack();
                     return back()->with('error', 'Stok "' . $menu->name . '" tidak mencukupi! Tersedia: ' . $menu->stock . ' porsi.');
                 }
+                $totalBatch += $menu->price * $item['quantity'];
+            }
+
+            // Check balance
+            if ($user->balance < $totalBatch) {
+                DB::rollBack();
+                return back()->with('error', 'Saldo tidak mencukupi! Saldo kamu: Rp ' . number_format($user->balance, 0, ',', '.') . ', dibutuhkan: Rp ' . number_format($totalBatch, 0, ',', '.'));
+            }
+
+            // Deduct balance once
+            $user->decrement('balance', $totalBatch);
+
+            foreach ($validated['items'] as $item) {
+                $menu = Menu::find($item['menu_id']);
 
                 Order::create([
                     'user_id'    => auth()->id(),
@@ -128,7 +154,7 @@ class OrderController extends Controller
 
             $label = $validated['pickup_time'] === 'istirahat_1' ? 'Istirahat 1 (10:00–10:30)' : 'Istirahat 2 (12:00–12:30)';
             return redirect()->route('customer.myOrders')
-                ->with('success', count($validated['items']) . ' pesanan berhasil dibuat! Silakan ambil saat ' . $label);
+                ->with('success', count($validated['items']) . ' pesanan berhasil! Saldo berkurang Rp ' . number_format($totalBatch, 0, ',', '.') . '. Ambil saat ' . $label);
 
         } catch (\Exception $e) {
             DB::rollBack();

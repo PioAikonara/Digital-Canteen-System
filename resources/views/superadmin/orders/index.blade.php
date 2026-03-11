@@ -110,7 +110,7 @@
                 </td>
                 <td style="font-size:12px;color:#64748b;">{{ $order->menu->admin->name ?? '-' }}</td>
                 <td style="text-align:right;font-weight:800;color:#16a34a;font-size:12px;">Rp {{ number_format($order->total_price,0,',','.') }}</td>
-                <td style="font-size:11px;color:#64748b;">{{ $order->pickup_time ? \Carbon\Carbon::parse($order->pickup_time)->format('H:i') : '-' }}</td>
+                <td style="font-size:11px;color:#64748b;">{{ $order->pickup_time_label ?? '-' }}</td>
                 <td>
                     <span class="status-badge" style="background:{{ $ss[2] }};color:{{ $ss[1] }};">
                         <span style="width:5px;height:5px;border-radius:50%;background:{{ $ss[1] }};display:inline-block;"></span>

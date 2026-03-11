@@ -25,7 +25,15 @@ class MenuController extends Controller
      */
     public function create()
     {
-        return view('admin.menus.create');
+        $categories = \App\Models\MenuCategory::all();
+        if ($categories->isEmpty()) {
+            $categories = collect([
+                (object)['name' => 'makanan', 'icon' => 'solar:bowl-spoon-bold',  'color' => '#F97316'],
+                (object)['name' => 'minuman', 'icon' => 'solar:cup-hot-bold',     'color' => '#3B82F6'],
+                (object)['name' => 'snack',   'icon' => 'solar:cookie-minimalistic-bold', 'color' => '#8B5CF6'],
+            ]);
+        }
+        return view('admin.menus.create', compact('categories'));
     }
 
     /**
@@ -33,9 +41,14 @@ class MenuController extends Controller
      */
     public function store(Request $request)
     {
+        $categories = \App\Models\MenuCategory::pluck('name')->toArray();
+        if (empty($categories)) {
+            $categories = ['makanan', 'minuman', 'snack'];
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'category' => 'required|in:makanan,minuman',
+            'category' => ['required', 'string', \Illuminate\Validation\Rule::in($categories)],
             'price' => 'required|numeric|min:0',
             'description' => 'nullable|string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -70,7 +83,15 @@ class MenuController extends Controller
      */
     public function edit(Menu $menu)
     {
-        return view('admin.menus.edit', compact('menu'));
+        $categories = \App\Models\MenuCategory::all();
+        if ($categories->isEmpty()) {
+            $categories = collect([
+                (object)['name' => 'makanan', 'icon' => 'solar:bowl-spoon-bold',  'color' => '#F97316'],
+                (object)['name' => 'minuman', 'icon' => 'solar:cup-hot-bold',     'color' => '#3B82F6'],
+                (object)['name' => 'snack',   'icon' => 'solar:cookie-minimalistic-bold', 'color' => '#8B5CF6'],
+            ]);
+        }
+        return view('admin.menus.edit', compact('menu', 'categories'));
     }
 
     /**
@@ -78,9 +99,14 @@ class MenuController extends Controller
      */
     public function update(Request $request, Menu $menu)
     {
+        $categories = \App\Models\MenuCategory::pluck('name')->toArray();
+        if (empty($categories)) {
+            $categories = ['makanan', 'minuman', 'snack'];
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'category' => 'required|in:makanan,minuman',
+            'category' => ['required', 'string', \Illuminate\Validation\Rule::in($categories)],
             'price' => 'required|numeric|min:0',
             'description' => 'nullable|string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',

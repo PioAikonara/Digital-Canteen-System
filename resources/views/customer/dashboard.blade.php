@@ -19,7 +19,7 @@
             </div>
             <div>
                 <div class="text-[10px] uppercase tracking-wider text-slate-400 font-medium">Saldo E-Wallet</div>
-                <div class="text-lg font-semibold text-[#2D336B]">Rp 0</div>
+                <div class="text-lg font-semibold text-[#2D336B]">Rp {{ number_format(Auth::user()->balance, 0, ',', '.') }}</div>
             </div>
         </div>
         <div class="bg-white p-4 rounded-2xl border border-slate-100 flex items-center gap-4">
